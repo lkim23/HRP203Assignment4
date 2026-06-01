@@ -1,7 +1,9 @@
 ---
 title: "HRP 203 Assignment 4: Reproducible Report"
 author: "Lauren Kim"
-format: html
+format: 
+  html:
+    embed-resources: true
 editor: visual
 execute:
   echo: false
