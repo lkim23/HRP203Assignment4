@@ -1,0 +1,134 @@
+---
+title: "HRP 203 Assignment 4: Reproducible Report"
+author: "Lauren Kim"
+format: html
+editor: visual
+execute:
+  echo: false
+---
+
+```{r}
+data <- read.csv("raw-data/cohort.csv")
+```
+
+## Introduction
+
+Cardiac disease is one of the leading causes of morbidity and mortality worldwide. Therefore, understanding the various factors associated with cardiovascular disease risk is critical for identifying high-risk populations and informing prevention strategies. Epidemiology studies often rely on cohort data to explore such relationships between individual characteristics and health outcomes.
+
+This report analyzes a **simulated cohort dataset** to examine predictors of cardiac disease. The dataset includes demographic and behavioral variables such as **age**, **smoking status**, and **sex** – all of which are well established and commonly studied risk factors in cardiovascular research. By using these variables, I aim to assess the extent to which they are associated with the likelihood of developing cardiac disease.
+
+The primary objective of this analysis is to evaluate how age, smoking status, and sex influence the probability of cardiac disease using a logistic regression model. On top of the regression analysis, descriptive statistics and visualizations are used to summarize the data and provide important insight into patterns within the cohort.
+
+As a whole, these approaches allow for a comprehensive assessment of both the distribution of variables and their relationships with our outcome of interest.
+
+## Methods
+
+This analysis uses a simulated cohort dataset to examine predictors of cardiac disease. The primary outcome variable was **cardiac disease status**, coded as a binary variable indicating the presence or absence of disease. Predictor variables included **age** (continuous), **smoking status** (binary), and **sex** (binary, female vs male).
+
+A **logistic regression model** was used to estimate the association between the predictor variables and the likelihood of cardiac disease. Logistic regression is appropriate for binary outcomes like this and models the log-odds of the outcome as a linear function of the predictors. The model can be expressed as follows:
+
+$$
+ \text{logit}(P(\text{cardiac})) = \beta_0 + \beta_1(\text{age}) + \beta_2(\text{smoke}) + \beta_3(\text{female})
+$$
+
+where **logit(*P*(cardiac))** represents the log-odds of having cardiac disease, ***β*****₀** is the intercept, and ***β*****₁**, ***β***[**₂**]{.underline}, and ***β*****₃** represent the coefficients for age, smoking status, and female sex, respectively.
+
+**Descriptive statistics** were then calculated to summarize the distribution of variables in the dataset. These included summary measures for continuous variables and frequency counts for categorical variables. In addition, visualizations were created to further explore relationships between predictors and cardiac disease status. All analyses were conducted using R, and the results were generated in a reproducible Quarto document.
+
+## Results
+
+**Summary statistics** for the dataset provide an overview of the distribution of age, smoking status, sex, and cardiac disease. These descriptive results help contextualize the regression findings by showing the overall characteristics of the cohort. They are presented below:
+
+```{r}
+
+knitr::kable(summary(data), caption = "Summary Statistics of Dataset")
+
+smoke_table <- as.data.frame(table(factor(data$smoke, labels = c("No", "Yes"))))
+knitr::kable(smoke_table, col.names = c("Smoking Status", "Count"),
+             caption = "Distribution of Smoking Status")
+
+female_table <- as.data.frame(table(factor(data$female, labels = c("Male", "Female"))))
+knitr::kable(female_table, col.names = c("Sex", "Count"),
+             caption = "Distribution of Sex")
+
+cardiac_table <- as.data.frame(table(factor(data$cardiac, labels = c("No Disease", "Cardiac Disease"))))
+knitr::kable(cardiac_table, col.names = c("Cardiac Status", "Count"),
+             caption = "Distribution of Cardiac Disease")
+```
+
+The **logistic regression analysis** results (*below*) indicate that age is **positively associated** with the likelihood of cardiac disease. This suggests that older individuals have a higher probability of experiencing cardiac disease compared to younger individuals. Although the magnitude of the effect was pretty modest, the association is still statistically significant and consistent with expected patterns in cardiovascular risk.
+
+```{r}
+model <- glm(cardiac ~ age + smoke + female, data = data, family = binomial)
+
+model_table <- summary(model)$coefficients
+model_df <- as.data.frame(model_table)
+
+knitr::kable(model_df, caption = "Logistic Regression Results")
+```
+
+**Smoking status** also shows a strong **positive association** with cardiac disease. Individuals who smoke have substantially higher odds of cardiac disease compared to non-smokers. This represents the strongest relationship observed in the model (with the largest coefficient) and aligns with well-established evidence linking smoking to cardiovascular disease.
+
+Additionally, **female sex** is associated with a lower likelihood of cardiac disease compared to male sex. This **negative association** suggests that females in this dataset have reduced odds of cardiac disease relative to males, which is consistent with known epidemiologic trends in cardiovascular outcomes.
+
+Figure 1 (*below*) illustrates the proportion of cardiac disease by smoking status. The visualization reinforces the regression findings.
+
+### Figure 1: Smoking vs. Cardiac
+
+```{r}
+library(ggplot2)
+ggplot(data, aes(x = factor(smoke, labels = c("No", "Yes")),
+                 fill = factor(cardiac, labels = c("No Disease", "Cardiac Disease")))) +
+  geom_bar(position = "fill") +
+  labs(
+    x = "Smoking Status",
+    y = "Proportion",
+    fill = "Cardiac Disease",
+    title = "Proportion of Cardiac Disease by Smoking Status",
+    subtitle = paste("n =", nrow(data))
+  ) +
+  scale_fill_grey(start = 0.7, end = 0.3) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(hjust = 0.5, face = "bold"),
+    plot.subtitle = element_text(hjust = 0.5)
+  )
+```
+
+Figure 2 (*below*) displays the distribution of age by cardiac disease status, which reinforces the regression findings.
+
+### Figure 2: Age vs. Cardiac
+
+```{r}
+ggplot(data, aes(x = factor(cardiac, labels = c("No", "Yes")), y = age)) +
+  geom_boxplot(outlier.shape = NA, fill = "lightgray") +
+  labs(
+    x = "Cardiac Disease",
+    y = "Age",
+    title = "Age Distribution by Cardiac Disease Status",
+    subtitle = paste("n =", nrow(data))
+  ) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(hjust = 0.5, face = "bold"),
+    plot.subtitle = element_text(hjust = 0.5)
+  )
+```
+
+Overall, these regression results and visualizations provide pretty consistent evidence that the variables age, smoking status, and sex are indeed (as we expect) important predictors of cardiac disease in this simulated cohort.
+
+## Discussion
+
+The findings from this analysis suggest that **age, smoking status, and sex are important predictors of cardiac disease** in this simulated cohort. Increasing age is associated with a higher likelihood of cardiac disease, reflecting the well-established relationship between aging and cardiovascular risk. Smoking demonstrates a particularly strong association with cardiac disease, highlighting its role as a major modifiable risk factor. Female sex appears to be protective, with lower odds of cardiac disease compared to males.
+
+These findings are **broadly consistent with existing knowledge** of cardiovascular risk factors. Smoking has long been identified as a key contributor to cardiac disease through mechanisms such as inflammation, endothelial damage, and increased atherosclerosis. Similarly, the association between age and cardiac disease reflects cumulative exposure to risk factors over time.
+
+Despite these insights, **several limitations should be considered**. First, the dataset used in this analysis is **simulated**, meaning that the relationships observed may not fully represent real-world patterns. Also, the relatively **small number of cardiac disease cases** compared to non-cases may influence the comparability and stability of estimates. It's worth noting also that the model includes only a **limited set of predictors**, and other important variables – such as physical activity, diet, or comorbid conditions - are not included. As such, the model may not capture the full complexity of cardiac disease risk.
+
+Additionally, logistic regression **assumes a linear relationship** between predictors and the log-odds of the outcome, which may not always hold in practice. Future analyses could explore more complex modeling approaches or include additional variables to improve predictive accuracy.
+
+In conclusion, this analysis demonstrates how logistic regression and data visualization can be used to identify and interpret predictors of a binary health outcome. The results highlight the importance of age and smoking as risk factors for cardiac disease and illustrate the value of reproducible analytical workflows in epidemiology research.
+
+## AI Statement
+
+I attest that I did not use generative AI technology to complete this assignment.
